@@ -82,7 +82,7 @@ points = [(640, 270),
 (565, 140),
 (570, 60),
 (500, 20),
-(433, 59),
+(430, 60),
 (431, 140),
 (499, 177),
 (372, 192),
@@ -112,11 +112,17 @@ points = [(640, 270),
 (742, 397),
 (777, 332),
 (859, 332),
-(720, 277)
+(720, 277),
+# red home 
+(580, 310),
+(600, 290),
+(620, 270)
 ]
-wait_for_point_selection = False
-wait_for_piece_selection = True
+
+# Control Variable
 select_piece = True
+
+
 #Game Loop
 running = True
 while running:
