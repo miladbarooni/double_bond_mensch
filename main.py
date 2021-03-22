@@ -71,6 +71,15 @@ points = [(588, 331),
 ]
 
 
+
+yellow_home = points[23:29]
+green_home = points[33:39]
+blue_home = points[3:9]
+red_home = points[13:19]
+
+corners = yellow_home + red_home + blue_home + green_home
+
+
 class Piece:
     def __init__(self, init_coordinate, image):
         self.position = init_coordinate
@@ -93,81 +102,92 @@ class Piece:
             return True
         return False
 
-class DoubleBond:
-    def __init__ (self, start_pos, end_pos, color):
-        self.start_pos = start_pos
-        self.end_pos = end_pos
+class Bond:
+    def __init__ (self, middle_pos, color):
         self.visibility = False
+        self.middle_pos = middle_pos
         self.color = color
+        sorted_corners = []
+        for corner in corners:
+            xs = (corner[0]) - self.middle_pos[0]
+            ys = (corner[1]) - self.middle_pos[1]
+            res = pow (pow(xs, 2) + pow(ys, 2), 0.5)
+            sorted_corners.append((res, corner))
+            
+            sorted_corners.sort(key=lambda x:x[0])
+        self.first = sorted_corners[0][1]
+        self.second = sorted_corners[1][1]
+        d_x = self.first[0] - self.second[0]
+        d_y = self.first[1] - self.second[1]
+
+        if d_x == 0 and self.middle_pos[0] > 500:
+            self.start_pos = (self.first[0] - 7, self.first[1])
+            self.end_pos =  (self.second[0] - 7, self.second[1])
+        elif d_x == 0 and self.middle_pos[0] < 500:
+            self.start_pos = (self.first[0] + 5, self.first[1])
+            self.end_pos =  (self.second[0] + 5, self.second[1])
+        elif d_y == 0 and self.middle_pos[1] < 400:
+            self.start_pos = (self.first[0], self.first[1]+5)
+            self.end_pos =  (self.second[0], self.second[1]+ 5)
+        elif d_y == 0 and self.middle_pos[1] > 400:
+            self.start_pos = (self.first[0], self.first[1]-13)
+            self.end_pos =  (self.second[0], self.second[1]-13)
+
+        else:
+            
+            m = d_x / d_y
+            if self.middle_pos[1] < 100 :
+                self.start_pos = (self.first[0], self.first[1]+5)
+                self.end_pos =  (self.second[0], self.second[1]+5)
+
+            elif self.middle_pos[1] < 700 and self.middle_pos[1] > 600:
+                self.start_pos = (self.first[0], self.first[1]+10)
+                self.end_pos =  (self.second[0], self.second[1]+10)
+
+            elif self.middle_pos[1] > 700:
+                self.start_pos = (self.first[0], self.first[1]-8)
+                self.end_pos =  (self.second[0], self.second[1]-8)
+
+            elif self.middle_pos[1] >100 and self.middle_pos[1] < 200:
+                self.start_pos = (self.first[0], self.first[1]-8)
+                self.end_pos =  (self.second[0], self.second[1]-8)
+
+            elif self.middle_pos[1] > 200 and self.middle_pos[1] < 400 and ( (self.middle_pos[0] > 125 and self.middle_pos[0] < 500) or self.middle_pos[0] > 875):
+                self.start_pos = (self.first[0]-8, self.first[1]+5)
+                self.end_pos =  (self.second[0]-8, self.second[1]+5)
+            elif self.middle_pos[1] > 200 and self.middle_pos[1] < 400 and (self.middle_pos[0] < 125 or self.middle_pos[0] < 875):
+                self.start_pos = (self.first[0]+8, self.first[1]+5)
+                self.end_pos =  (self.second[0]+8, self.second[1]+5)
+            elif self.middle_pos[1] > 400 and self.middle_pos[1] < 600 and ( (self.middle_pos[0] > 125 and self.middle_pos[0] < 500) or self.middle_pos[0] > 875):
+                self.start_pos = (self.first[0]-8, self.first[1]-5)
+                self.end_pos =  (self.second[0]-8, self.second[1]-5)
+            elif self.middle_pos[1] > 400 and self.middle_pos[1] < 600 and (self.middle_pos[0] < 125 or self.middle_pos[0] < 875):
+                self.start_pos = (self.first[0]+8, self.first[1]-5)
+                self.end_pos =  (self.second[0]+8, self.second[1]-5)
+
+        # m = d_x/d_y
+        # if (m<0 and self.middle_pos[1] < 200) or ():
+        #     self.start_pos = 
+
     def toggle (self):
         self.visibility = not self.visibility
     def locate(self):
         if self.visibility:
-            pygame.draw.line(screen, color_dict[self.color], self.start_pos, self.end_pos)
-
-class Home:
-    def __init__(self, corners, middle_positions, color):
-        self.middle_positions = middle_positions
-        self.corners = corners[:]
-        self.double_bonds = []
-        self.color = color
-        for i in range(5):
-            d_x = corners[i][0] - corners[i+1][0]
-            d_y = corners[i][1] - corners[i+1][1]
-            if (d_x == 0):
-                if (corners[i][0]>500):
-                    start_pos = (corners[i][0]-10, corners[i][1])
-                    end_pos = (corners[i+1][0]-10, corners[i+1][1])
-                    new = DoubleBond(start_pos, end_pos, self.color)
-                    self.double_bonds.append(new)
-                else:
-                    start_pos = (corners[i][0]+10, corners[i][1])
-                    end_pos = (corners[i+1][0]+10, corners[i+1][1])
-                    new = DoubleBond(start_pos, end_pos, self.color)
-                    self.double_bonds.append(new)
-            
-            
-
-        
-    
+            pygame.draw.line (screen, color_dict[self.color], self.start_pos, self.end_pos, 5)
     def distance_check(self, clicked_pos):
-        for middle_pos in self.middle_positions:
-            xs = (middle_pos[0]) - clicked_pos[0]
-            ys = (middle_pos[1]) - clicked_pos[1]
-            res = pow (pow(xs, 2) + pow(ys, 2), 0.5)
-            if (res < 10):
-                corners = self.corners[:]
-                sorted_corners = []
-                for corner in corners:
-                    xs = (corner[0]) - middle_pos[0]
-                    ys = (corner[1]) - middle_pos[1]
-                    res = pow (pow(xs, 2) + pow(ys, 2), 0.5)
-                    sorted_corners.append((res, corner))
-                
-                sorted_corners.sort(key=lambda x:x[0])
-                print (sorted_corners)
-                # print (sorted_corners[0][1], sorted_corners[1][1])
-                if (self.color == "yellow" or self.color == "blue"):
-                    d_x = sorted_corners[0][1][0] - sorted_corners[1][1][0]
-                    d_y = sorted_corners[0][1][1] - sorted_corners[1][1][1]
-                    if (d_x == 0):
-                        print ("hello")
-                        print (color_dict[self.color])
-                        line = (sorted_corners[0][1] - 5, sorted_corners[1][1])
-                        # pygame.draw.line(screen, color_dict[self.color], sorted_corners[0][1], sorted_corners[1][1])
-                    else:
-                        print ("hello2")
-                        m = d_y/d_x
-                
-        return
-    
+        xs = (self.middle_pos[0]) - clicked_pos[0]
+        ys = (self.middle_pos[1]) - clicked_pos[1]
+        res = pow (pow(xs, 2) + pow(ys, 2), 0.5)
+        if (res < 10):
+            return True
+        return False
+            
 class Player:
-    def __init__ (self, init_pos, home, bonds, p_image, color):
+    def __init__ (self, init_pos, p_image, color):
         piece1 = Piece(init_pos[0], p_image)
         piece2 = Piece(init_pos[1], p_image)
         piece3 = Piece(init_pos[2], p_image)
         self.pieces = [piece1, piece2, piece3]
-        self.home = Home(home, bonds, color)
         self.color = color
 
 
@@ -192,27 +212,41 @@ dice_image = zero
 
 # Loading player images
 players = []
-yellow_bond = [(529, 636),(465, 639),(432, 696),(461, 754),(535, 755),(568, 697)]
 yellow_init = [(580, 490), (600, 510), (620, 530)]
-yellow_home = points[23:29]
-yellow_player = Player(yellow_init, yellow_home, yellow_bond, "Images/Player/yellow.png", "yellow")
+yellow_player = Player(yellow_init, "Images/Player/yellow.png", "yellow")
 
 
-green_bond = [(817, 331),(876, 362),(878, 431),(816, 468),(759, 434),(758, 367)]
 green_init = [(580, 310),(600, 290),(620, 270)]
-green_home = points[33:39]
-green_player = Player(green_init, green_home, green_bond, "Images/Player/green.png", "green")
+green_player = Player(green_init, "Images/Player/green.png", "green")
 
-blue_bond = [(432, 99),(465, 160),(536, 159),(568, 98),(533, 41),(463, 44)]
 blue_init = [(420, 310), (400, 290), (380, 270)]
-blue_home = points[3:9]
-blue_player = Player(blue_init, blue_home, blue_bond, "Images/Player/blue.png", "blue")
+blue_player = Player(blue_init, "Images/Player/blue.png", "blue")
 
-red_bond = [(180, 332),(239, 365),(241, 431),(177, 467),(122, 432),(123, 364)]
 red_init = [(420, 490), (400, 510),(380, 530)]
-red_home = points[13:19]
-red_player = Player(red_init, red_home, red_bond, "Images/Player/red.png", "red" )
+red_player = Player(red_init, "Images/Player/red.png", "red" )
 players = [red_player, blue_player, yellow_player, green_player]
+
+yellow_bond = [(529, 636),(465, 639),(432, 696),(461, 754),(535, 755),(568, 697)]
+green_bond = [(817, 331),(876, 362),(878, 431),(816, 468),(759, 434),(758, 367)]
+blue_bond = [(432, 99),(465, 160),(536, 159),(568, 98),(533, 41),(463, 44)]
+red_bond = [(180, 332),(239, 365),(241, 431),(177, 467),(122, 432),(123, 364)]
+
+# making all bonds with their color
+bonds = []
+for mid in yellow_bond:
+    new = Bond(mid, "yellow")
+    bonds.append(new)
+for mid in red_bond:
+    new = Bond(mid, "red")
+    bonds.append(new)
+for mid in blue_bond:
+    new = Bond(mid, "blue")
+    bonds.append(new)
+for mid in green_bond:
+    new = Bond(mid, "green")
+    bonds.append(new)
+
+
 
 
 
@@ -259,9 +293,8 @@ while running:
     for player in players:
         for piece in player.pieces:
             piece.locate()
-        for double_bond in player.home.double_bonds:
-            double_bond.locate()
-
+    for bond in bonds:
+        bond.locate()
     for event in pygame.event.get(): 
 
         # when click on the quit
@@ -282,8 +315,9 @@ while running:
             # print (x, y)
             # when waiting for selecting a piece
 
-            for player in players:
-                player.home.distance_check(event.pos)
+            for bond in bonds:
+                if bond.distance_check(event.pos):
+                    bond.toggle()
 
             if select_piece:
                 
