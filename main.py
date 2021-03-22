@@ -339,13 +339,4 @@ while running:
                         current_piece.move(point)
                         select_piece = True
 
-            
-           
-            
-            
-                
-
-
-    
-
     pygame.display.update()
