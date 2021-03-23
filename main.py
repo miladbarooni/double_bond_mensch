@@ -248,8 +248,6 @@ for mid in green_bond:
 
 
 
-
-
 def distance_check(point1, point2):
     xs = point1[0] - point2[0]
     ys = point1[1] - point2[1]
@@ -261,9 +259,6 @@ def distance_check(point1, point2):
 def board_logo ():
     screen.blit(board_image,(board_image_x, board_image_y))
     screen.blit(shiraz_university, (shiraz_logo_x, shiraz_logo_y))
-
-
-
 
 # for i  in range(4):
 #     print (i)
